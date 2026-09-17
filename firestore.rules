@@ -1,48 +1,9 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Default Deny
     match /{document=**} {
-      allow read, write: if false;
-    }
-
-    // Helper functions
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    // Users Collection
-    match /users/{userId} {
-      // Anyone signed in can read (needed for leaderboards, doubt solving author info, etc.)
-      allow read: if isSignedIn();
-      
-      // Only the owner can write to their own profile
-      allow write: if isOwner(userId);
-    }
-
-    // Workspaces Collection (for Study Partner collaboration)
-    match /workspaces/{workspaceId} {
-      // Since workspaceId seems to be derived from user IDs (e.g., user1_user2) or generated
-      // we can allow read/write to any authenticated user for now to keep chat working,
-      // or we can just enforce they are signed in.
-      allow read, write: if isSignedIn();
-
-      match /messages/{messageId} {
-        allow read: if isSignedIn();
-        // Allow write if signed in and the message is from them
-        allow write: if isSignedIn() && request.resource.data.author_id == request.auth.uid;
-      }
-      
-      match /resources/{resourceId} {
-        allow read: if isSignedIn();
-        // Allow write if signed in
-        allow write: if isSignedIn() && request.resource.data.added_by == request.auth.uid;
-      }
+      allow read, write: if true;
     }
   }
 }

@@ -94,7 +94,7 @@ export default function App() {
       } else {
         // If DB is totally empty, seed it with initial users
         INITIAL_USERS.forEach(user => {
-          setDoc(doc(db, 'users', user.id), user).catch(console.error); localStorage.setItem(`eduquest_user_${user.id}`, JSON.stringify(user));
+          setDoc(doc(db, 'users', user.id), user).catch(console.error);
         });
       }
     });
@@ -129,7 +129,7 @@ export default function App() {
     try {
       localStorage.setItem('eduquest_auth', 'true');
       localStorage.setItem('eduquest_user_id', activeUser.id);
-      setDoc(doc(db, 'users', activeUser.id), activeUser).catch(console.error); localStorage.setItem(`eduquest_user_${activeUser.id}`, JSON.stringify(activeUser));
+      setDoc(doc(db, 'users', activeUser.id), activeUser).catch(console.error);
     } catch {
       // ignore
     }
@@ -144,13 +144,11 @@ export default function App() {
   const handleRegisterSuccess = (newUser: StudentUser) => {
     setAllUsers(prev => [newUser, ...prev]);
     setCurrentUser(newUser);
-    localStorage.setItem("eduquest_user_id", newUser.id);
-    localStorage.setItem("eduquest_auth", "true");
     setIsAuthenticated(true);
     try {
       localStorage.setItem('eduquest_auth', 'true');
       localStorage.setItem('eduquest_user_id', newUser.id);
-      setDoc(doc(db, 'users', newUser.id), newUser).catch(console.error); localStorage.setItem(`eduquest_user_${newUser.id}`, JSON.stringify(newUser));
+      setDoc(doc(db, 'users', newUser.id), newUser).catch(console.error);
     } catch {
       // ignore
     }
@@ -177,7 +175,7 @@ export default function App() {
       setAllUsers(prev => prev.map(u => u.id === activeUser.id ? activeUser : u));
       try {
         localStorage.setItem('eduquest_user_id', activeUser.id);
-        setDoc(doc(db, 'users', activeUser.id), activeUser).catch(console.error); localStorage.setItem(`eduquest_user_${activeUser.id}`, JSON.stringify(activeUser));
+        setDoc(doc(db, 'users', activeUser.id), activeUser).catch(console.error);
       } catch {
         // ignore
       }
@@ -206,7 +204,7 @@ export default function App() {
     setCurrentUser(updatedUser);
     setAllUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
     try {
-      setDoc(doc(db, 'users', updatedUser.id), updatedUser).catch(console.error); localStorage.setItem(`eduquest_user_${updatedUser.id}`, JSON.stringify(updatedUser));
+      setDoc(doc(db, 'users', updatedUser.id), updatedUser).catch(console.error);
     } catch {
       // ignore
     }
@@ -461,7 +459,7 @@ export default function App() {
     setCurrentUser(updatedUser);
     setAllUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
     try {
-      setDoc(doc(db, 'users', updatedUser.id), updatedUser).catch(console.error); localStorage.setItem(`eduquest_user_${updatedUser.id}`, JSON.stringify(updatedUser));
+      setDoc(doc(db, 'users', updatedUser.id), updatedUser).catch(console.error);
     } catch {
       // ignore
     }
@@ -474,15 +472,13 @@ export default function App() {
     };
     setCurrentUser(updatedUser);
     setAllUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
-    setDoc(doc(db, 'users', updatedUser.id), updatedUser).catch(console.error); localStorage.setItem(`eduquest_user_${updatedUser.id}`, JSON.stringify(updatedUser));
+    setDoc(doc(db, 'users', updatedUser.id), updatedUser).catch(console.error);
   };
 
   const handleRegisterUser = (newUser: StudentUser) => {
     setAllUsers(prev => [newUser, ...prev]);
     setCurrentUser(newUser);
-    localStorage.setItem("eduquest_user_id", newUser.id);
-    localStorage.setItem("eduquest_auth", "true");
-    setDoc(doc(db, 'users', newUser.id), newUser).catch(console.error); localStorage.setItem(`eduquest_user_${newUser.id}`, JSON.stringify(newUser));
+    setDoc(doc(db, 'users', newUser.id), newUser).catch(console.error);
   };
 
   const handleSendInvite = (targetUserId: string) => {
@@ -493,7 +489,7 @@ export default function App() {
           // Update the target user's local storage entry too to persist
           const updatedTarget = { ...u, study_invites: [...invites, currentUser.id] };
           try {
-            setDoc(doc(db, 'users', updatedTarget.id), updatedTarget).catch(console.error); localStorage.setItem(`eduquest_user_${updatedTarget.id}`, JSON.stringify(updatedTarget));
+            setDoc(doc(db, 'users', updatedTarget.id), updatedTarget).catch(console.error);
           } catch {}
           return updatedTarget;
         }
@@ -519,14 +515,14 @@ export default function App() {
           accepted_buddies: [...(u.accepted_buddies || []), updatedUser.id]
         };
         try {
-          setDoc(doc(db, 'users', updatedSender.id), updatedSender).catch(console.error); localStorage.setItem(`eduquest_user_${updatedSender.id}`, JSON.stringify(updatedSender));
+          setDoc(doc(db, 'users', updatedSender.id), updatedSender).catch(console.error);
         } catch {}
         return updatedSender;
       }
       return u;
     }));
     try {
-      setDoc(doc(db, 'users', updatedUser.id), updatedUser).catch(console.error); localStorage.setItem(`eduquest_user_${updatedUser.id}`, JSON.stringify(updatedUser));
+      setDoc(doc(db, 'users', updatedUser.id), updatedUser).catch(console.error);
     } catch {}
     showToast(`✅ You accepted the study buddy invitation! Workspace created.`, 'success');
   };

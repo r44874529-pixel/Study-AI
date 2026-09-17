@@ -22,9 +22,6 @@ import {
   Flame
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { auth, db } from '../utils/firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 
 interface AuthPageProps {
   allUsers: StudentUser[];
@@ -60,11 +57,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({
   const [regBio, setRegBio] = useState<string>('');
   const [regAgreeTerms, setRegAgreeTerms] = useState<boolean>(false);
 
-  const [isAuthLoading, setIsAuthLoading] = useState(false);
-
-  const handleLoginSubmit = async (e: React.FormEvent) => {
+  const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!loginEmail.trim()) {
       showToast('Student Email Address is required.', 'error');
       return;
@@ -86,53 +80,19 @@ export const AuthPage: React.FC<AuthPageProps> = ({
       return;
     }
 
-    setIsAuthLoading(true);
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, loginEmail.trim(), loginPassword);
-      const uid = userCredential.user.uid;
+    // Check if email matches an existing user or fallback to first persona
+    const foundUser = allUsers.find(
+      u => u.email.toLowerCase() === loginEmail.trim().toLowerCase()
+    ) || allUsers[0];
 
-      // Try to find the user in our local allUsers array first
-      let foundUser = allUsers.find(u => u.id === uid);
-      
-      // If not in local state, fetch directly from Firestore
-      if (!foundUser) {
-        const docRef = doc(db, 'users', uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          foundUser = docSnap.data() as StudentUser;
-        } else {
-          throw new Error('User profile not found in database.');
-        }
-      }
+    confetti({
+      particleCount: 75,
+      spread: 60,
+      origin: { y: 0.6 }
+    });
 
-      confetti({
-        particleCount: 75,
-        spread: 60,
-        origin: { y: 0.6 }
-      });
-
-      showToast(`Welcome back, ${foundUser.name}! Opening EduQuest...`, 'success');
-      onLoginSuccess(foundUser);
-    } catch (error: any) {
-      console.error("Login error:", error);
-      showToast(error.message || 'Failed to sign in. Please check your credentials.', 'error');
-    } finally {
-      setIsAuthLoading(false);
-    }
-  };
-
-  const handleForgotPassword = async () => {
-    if (!loginEmail.trim()) {
-      showToast('Please enter your email address first to reset password.', 'warning');
-      return;
-    }
-    try {
-      await sendPasswordResetEmail(auth, loginEmail.trim());
-      showToast('Password reset email sent! Check your inbox.', 'success');
-    } catch (error: any) {
-      console.error("Reset error:", error);
-      showToast(error.message || 'Failed to send reset email.', 'error');
-    }
+    showToast(`Welcome back, ${foundUser.name}! Opening EduQuest...`, 'success');
+    onLoginSuccess(foundUser);
   };
 
   const handleQuickPersonaLogin = (user: StudentUser) => {
@@ -148,7 +108,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
     onLoginSuccess(user);
   };
 
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
+  const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Strict requirement validation for every field
@@ -223,48 +183,36 @@ export const AuthPage: React.FC<AuthPageProps> = ({
       return;
     }
 
-    setIsAuthLoading(true);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, regEmail.trim(), regPassword);
-      const uid = userCredential.user.uid;
+    const initialRating = calculateRating(2, 1, 1, 3, 85);
+    const newUser: StudentUser = {
+      id: `user_${Math.random().toString(36).substring(2, 9)}`,
+      name: regName.trim(),
+      email: regEmail.trim(),
+      avatar: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150`,
+      school: regSchool.trim(),
+      student_class: regClass,
+      target_exam: regExam,
+      stream: regStream,
+      stars: 10, // 10 Free Registration Stars!
+      streak_days: 1,
+      last_login_date: new Date().toISOString().split('T')[0],
+      last_spin_date: '',
+      modules_completed: 2,
+      doubts_solved: 1,
+      upvotes_received: 3,
+      quiz_accuracy_pct: 85,
+      rating_score: initialRating,
+      bio: regBio.trim()
+    };
 
-      const initialRating = calculateRating(0, 0, 0, 0, 0);
-      
-      const newUser: StudentUser = {
-        id: uid,
-        name: regName.trim(),
-        email: regEmail.trim(),
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(regName.trim())}&background=random`,
-        school: regSchool.trim(),
-        student_class: regClass,
-        target_exam: regExam,
-        stream: regStream,
-        stars: 10,
-        streak_days: 1,
-        last_login_date: new Date().toISOString().split('T')[0],
-        last_spin_date: '',
-        modules_completed: 0,
-        doubts_solved: 0,
-        upvotes_received: 0,
-        quiz_accuracy_pct: 0,
-        rating_score: initialRating,
-        bio: regBio.trim()
-      };
+    confetti({
+      particleCount: 120,
+      spread: 80,
+      origin: { y: 0.6 }
+    });
 
-      confetti({
-        particleCount: 120,
-        spread: 80,
-        origin: { y: 0.6 }
-      });
-
-      showToast(`Account created! +10 Free Stars credited to ${newUser.name}.`, 'success');
-      onRegisterSuccess(newUser);
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      showToast(error.message || 'Failed to create account.', 'error');
-    } finally {
-      setIsAuthLoading(false);
-    }
+    showToast(`Account created! +10 Free Stars credited to ${newUser.name}.`, 'success');
+    onRegisterSuccess(newUser);
   };
 
   return (
@@ -438,7 +386,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                       </label>
                       <button
                         type="button"
-                        onClick={handleForgotPassword}
+                        onClick={() => showToast('Demo accounts can sign in directly or with 1-click!', 'info')}
                         className="text-[11px] text-indigo-600 hover:text-indigo-700 transition font-medium"
                       >
                         Forgot password?
